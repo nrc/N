@@ -1,0 +1,44 @@
+[[%\input{macros.tex}]]
+[[\newcommand{\redArrow}{\leadsto}]]
+[[\newcommand{\ok}{\mbox{ \sc ok}}]]
+
+syntax
+  T;U ::= int | T to T "types"
+  e ::= n | x | e e | lam x:T.e {binds x in e} "expressions"
+  [[]]
+  v ::= n | lam x:T.e {binds x in e} "values"
+  [[]]
+  env {x->T} G [[\Gamma]]_ ::= [x:T] {binds [x]} "environments"
+  [[]]
+  {ints} n "integers"
+  var {e} x; y; z "variables"
+  lam [[\lambda]]
+  to [[\rightarrow]]
+
+  
+[[%semantics:]]
+  
+judge tcheck G |- e; T [[G \vdash e : T]] "type checking"
+  case G |- lam x:T.e; T to U "T-Abs"
+    tcheck G,x:T |- e; U
+  case G |- x; T "T-Var"
+    G((x)) = T
+  case G |- e e'; T "T-App"
+    tcheck G |- e; U to T
+    tcheck G |- e'; U
+  case G |- n; int "T-Int"
+    
+    
+judge wf |- T [[\vdash T \ok]] "well-formedness"
+  case |- int "F-Int"
+  case |- T to T' "F-Fun"
+    wf |- T
+    wf |- T'
+    
+judge op |- e; e [[e \redArrow e ]] "reduction"
+  case |- e1 e2; e1' e2 "RC-App-1"
+    op |- e1; e1'
+  case |- v e; v e' "RC-App-2"
+    op |- e; e'
+  case |- (lam x:T.e) v; {v/x}e "R-App"
+

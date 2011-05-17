@@ -1,0 +1,267 @@
+\newcommand{\nnnC}{\code{C}}
+\newcommand{\nnne}{e}
+\newcommand{\nnnD}{\code{D}}
+\newcommand{\nnnG}{\Gamma}
+\newcommand{\nnnf}{\code{f}}
+\newcommand{\nnnthis}{\code{this}}
+\newcommand{\nnnm}{\code{m}}
+\newcommand{\nnnObject}{\code{Object}}
+\newcommand{\nnnM}{M}
+\newcommand{\nnnPP}{\mathcal{P}}
+\newcommand{\nnnQ}{Q}
+\newcommand{\nnnP}{P}
+\newcommand{\nnnext}{\extends}
+\newcommand{\nnnU}{U}
+\newcommand{\nnnT}{T}
+\newcommand{\nnnv}{v}
+\newcommand{\nnny}{\code{y}}
+\newcommand{\nnnx}{\code{x}}
+\newcommand{\nnnz}{\code{z}}
+\newcommand{\nnnLANGLE}{\code{(}}
+\newcommand{\nnnRANGLE}{\code{)}}
+
+\newcommand{\nnjmBody}[4]{mBody({#1}, {#2}) = {#3};{#4}}
+\newcommand{\nnjmcheck}[3]{{#1} \vdash {#3} \inn {#2}}
+\newcommand{\nnjwf}[1]{\vdash {#1} \ok}
+\newcommand{\nnjfields}[3]{fields({#1}) = {#2};{#3}}
+\newcommand{\nnjtcheck}[3]{{#1} \vdash {#2} : {#3}}
+\newcommand{\nnjpcheck}[1]{\vdash {#1}}
+\newcommand{\nnjccheck}[1]{\vdash {#1}}
+\newcommand{\nnjmType}[4]{mType({#1}, {#2}) = {#3};{#4}}
+\newcommand{\nnjsubtype}[2]{\vdash {#1} <: {#2}}
+\newcommand{\nnjfType}[3]{fType({#1}, {#2}) = {#3}}
+\newcommand{\nnjoverride}[4]{override_{}({#1}, {#2}, {#3}, {#4})}
+
+
+\input{nobmacros.tex}
+\input{nobpreboiler.tex}
+
+\newcommand{\redArrow}{\leadsto}
+
+\newcommand{\ok}{\mbox{ \sc ok}}
+
+\newcommand{\inn}{\mbox{ \sc in}}
+
+\newcommand{\extends}{\lhd}
+
+\startSyntaxFig
+
+$\nnnP $\>\bbc\> $\overline{\nnnQ} \ \nnne $\>\annot{programs}\\
+$\nnnQ $\>\bbc\> $\code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ \overline{\nnnT \ \nnnf \code{;}} \ \overline{\nnnM} \ \code{\}} $\>\annot{class definitions}\\
+$\nnnM $\>\bbc\> $\nnnT \ \nnnm \nnnLANGLE \overline{\nnnT \ \nnnx} \nnnRANGLE \code{\{} \ \code{return} \ \nnne \code{;} \code{\}} $\>\annot{method definitions}\\
+\\
+
+$\nnnT, \nnnU $\>\bbc\> $\nnnC $\>\annot{types}\\
+$\nnne $\>\bbc\> $\nnnx \OR \code{new} \ \nnnC \nnnLANGLE \overline{\nnne} \nnnRANGLE \OR \nnne \code{.} \nnnf \OR \nnne \code{.} \nnnm \nnnLANGLE \overline{\nnne} \nnnRANGLE $\>\annot{expressions}\\
+$\nnnv $\>\bbc\> $\code{new} \ \nnnC \nnnLANGLE \overline{\nnnv} \nnnRANGLE $\>\annot{values}\\
+\\
+
+$\nnnx, \nnny, \nnnz, \nnnthis $\>\> \>\annot{variables}\\
+$\nnnC, \nnnD, \nnnObject $\>\> \>\annot{class names}\\
+$\nnnf $\>\> \>\annot{field names}\\
+$\nnnm $\>\> \>\annot{method names}\\
+\\
+
+$\nnnG $\>\bbc\> $\overline{\nnnx \code{:} \nnnT} $\>\annot{environments}\\
+$\nnnPP $\>\bbc\> $\overline{\nnnC \code{:} \nnnQ} $\>\annot{programs}\\
+\\
+
+%$\nnnext $\>\> \\
+%$\nnnLANGLE $\>\> \\
+%$\nnnRANGLE $\>\> \\
+
+\finSyntaxFig
+
+
+
+
+\startJudgeFig{}{\nnjfields{\nnnC}{\overline{\nnnf}}{\overline{\nnnT}}}
+
+\auxRule{
+}{
+\nnjfields{\nnnObject}{\emptyset}{\emptyset}
+}
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ \overline{\nnnT \ \nnnf \code{;}} \ \overline{\nnnM} \ \code{\}}\qquad
+\nnjfields{\nnnD}{\overline{\nnnf'}}{\overline{\nnnT'}}
+}{
+\nnjfields{\nnnC}{\overline{\nnnf},\overline{\nnnf'}}{\overline{\nnnT},\overline{\nnnT'}}
+}
+\finJudgeFig{}{fields}
+
+
+\startJudgeFig{}{\nnjfType{\nnnf}{\nnnC}{\nnnT}}
+
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ \overline{\nnnT \ \nnnf \code{;}} \ ... \ \code{\}}
+}{
+\nnjfType{(\nnnf_{\code{i}})}{\nnnC}{(\nnnT_{\code{i}})}
+}
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ \overline{\nnnT \ \nnnf \code{;}} \ ... \ \code{\}}\qquad
+\nnnf \notin \overline{\nnnf}\qquad
+\nnjfType{\nnnf}{\nnnD}{\nnnT}
+}{
+\nnjfType{\nnnf}{\nnnC}{\nnnT}
+}
+\finJudgeFig{}{fType}
+
+
+\startJudgeFig{}{\nnjmType{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}}
+
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ ... \ \overline{\nnnM} \ \code{\}}\qquad
+\nnnT \ \nnnm \nnnLANGLE \overline{\nnnT \ \nnnx} \nnnRANGLE ... \in \overline{\nnnM}
+}{
+\nnjmType{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}
+}
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ ... \ \overline{\nnnM} \ \code{\}}\qquad
+\nnnU \ \nnnm \ ... \notin \overline{\nnnM}\qquad
+\nnjmType{\nnnm}{\nnnD}{\overline{\nnnT}}{\nnnT}
+}{
+\nnjmType{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}
+}
+\finJudgeFig{}{mType}
+
+
+\startJudgeFig{}{\nnjmBody{\nnnm}{\nnnC}{\overline{\nnnx}}{\nnne}}
+
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ ... \ \overline{\nnnM} \ \code{\}}\qquad
+\nnnT \ \nnnm \nnnLANGLE \overline{\nnnT \ \nnnx} \nnnRANGLE \code{\{} \ \code{return} \ \nnne \code{;} \code{\}} \in \overline{\nnnM}
+}{
+\nnjmBody{\nnnm}{\nnnC}{\overline{\nnnx}}{\nnne}
+}
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ ... \ \overline{\nnnM} \ \code{\}}\qquad
+\nnnT \ \nnnm \ ... \notin \overline{\nnnM}\qquad
+\nnjmBody{\nnnm}{\nnnD}{\overline{\nnnx}}{\nnne}
+}{
+\nnjmBody{\nnnm}{\nnnC}{\overline{\nnnx}}{\nnne}
+}
+\finJudgeFig{}{mBody}
+
+
+\startJudgeFig{}{\nnjoverride{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}}
+
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ ...\qquad
+\nnjmType{\nnnm}{\nnnD}{\overline{\nnnU}}{\nnnU}\ \mbox{\em undefined}
+}{
+\nnjoverride{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}
+}
+\auxRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ ...\qquad
+\nnjmType{\nnnm}{\nnnD}{\overline{\nnnT}}{\nnnT}
+}{
+\nnjoverride{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}
+}
+\finJudgeFig{}{override}
+
+
+\startJudgeFig{Subtyping}{\nnjsubtype{\nnnT}{\nnnT}}
+
+\redRule{
+}{
+\nnjsubtype{\nnnT}{\nnnT}
+}{S-Reflex}
+\redRule{
+\nnjsubtype{\nnnT_{1}}{\nnnT_{3}}\qquad
+\nnjsubtype{\nnnT_{2}}{\nnnT_{3}}
+}{
+\nnjsubtype{\nnnT_{1}}{\nnnT_{2}}
+}{S-Trans}
+\redRule{
+\nnnPP(\nnnC) = \code{class} \ \nnnC \ \nnnext \ \nnnD \ ...
+}{
+\nnjsubtype{\nnnC}{\nnnD}
+}{S-Sub-Class}
+\finJudgeFig{\lang subtyping.}{subtype}
+
+
+\startJudgeFig{Well-formedness}{\nnjwf{\nnnT}}
+
+\redRule{
+\nnnPP(\nnnC) = ...
+}{
+\nnjwf{\nnnC}
+}{F-Class}
+\finJudgeFig{\lang well-formedness.}{wf}
+
+
+\startJudgeFig{Type checking}{\nnjtcheck{\nnnG}{\nnne}{\nnnT}}
+
+\redRule{
+\nnjtcheck{\nnnG}{\nnne}{\nnnU}\qquad
+\nnjsubtype{\nnnU}{\nnnT}
+}{
+\nnjtcheck{\nnnG}{\nnne}{\nnnT}
+}{T-Subs}
+\redRule{
+\nnnT = \nnnG(\nnnx)
+}{
+\nnjtcheck{\nnnG}{\nnnx}{\nnnT}
+}{T-Var}
+\redRule{
+\nnjfields{\nnnC}{\overline{\nnnf}}{\overline{\nnnT}}\qquad
+\nnjtcheck{\nnnG}{\overline{\nnne}}{\overline{\nnnT}}
+}{
+\nnjtcheck{\nnnG}{\code{new} \ \nnnC \nnnLANGLE \overline{\nnne} \nnnRANGLE}{\nnnC}
+}{T-New}
+\redRule{
+\nnjtcheck{\nnnG}{\nnne}{\nnnC}\qquad
+\nnjfType{\nnnf}{\nnnC}{\nnnT}
+}{
+\nnjtcheck{\nnnG}{\nnne \code{.} \nnnf}{\nnnT}
+}{T-Field}
+\redRule{
+\nnjtcheck{\nnnG}{\nnne}{\nnnC}\qquad
+\nnjmType{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}\qquad
+\nnjtcheck{\nnnG}{\overline{\nnne}}{\overline{\nnnT}}
+}{
+\nnjtcheck{\nnnG}{\nnne \code{.} \nnnm \nnnLANGLE \overline{\nnne} \nnnRANGLE}{\nnnT}
+}{T-Invk}
+\finJudgeFig{\lang type checking.}{tcheck}
+
+
+\startJudgeFig{Well-typed methods}{\nnjmcheck{\nnnG}{\nnnC}{\nnnM}}
+
+\redRule{
+\nnjwf{\nnnT}\qquad
+\nnjwf{\overline{\nnnT}}\qquad
+\nnjtcheck{\nnnG,\overline{\nnnx \code{:} \nnnT}}{\nnne}{\nnnT}\\
+\nnjoverride{\nnnm}{\nnnC}{\overline{\nnnT}}{\nnnT}
+}{
+\nnjmcheck{\nnnG}{\nnnC}{\nnnT \ \nnnm \nnnLANGLE \overline{\nnnT \ \nnnx} \nnnRANGLE \code{\{} \ \code{return} \ \nnne \code{;} \code{\}}}
+}{T-Method}
+\finJudgeFig{\lang well-typed methods.}{mcheck}
+
+
+\startJudgeFig{Well-typed classes}{\nnjccheck{\nnnQ}}
+
+\redRule{
+\nnjwf{\nnnD}\qquad
+\nnjwf{\overline{\nnnT}}\qquad
+\nnjmcheck{\nnnthis \code{:} \nnnC}{\nnnC}{\overline{\nnnM}}
+}{
+\nnjccheck{\code{class} \ \nnnC \ \nnnext \ \nnnD \ \code{\{} \ \overline{\nnnT \ \nnnf \code{;}} \ \overline{\nnnM} \ \code{\}}}
+}{T-Class}
+\finJudgeFig{\lang well-typed classes.}{ccheck}
+
+
+\startJudgeFig{Well-typed programs}{\nnjpcheck{\nnnP}}
+
+\auxRule{
+\nnjccheck{\overline{\nnnQ}}\qquad
+\nnjtcheck{\emptyset}{\nnne}{\nnnT}\qquad
+\overline{\nnnQ} = \overline{\code{class} \ \nnnC \ ...}\\
+\nnnPP = \nnnObject \code{:} (\code{class} \ \nnnObject \ \nnnext \ \nnnObject \ \code{\{} \  \  \ \code{\}}),\overline{\nnnC \code{:} \nnnQ}
+}{
+\nnjpcheck{\overline{\nnnQ} \ \nnne}
+}
+\finJudgeFig{\lang well-typed programs.}{pcheck}
+
+
+\input{nobpostboiler.tex}
+

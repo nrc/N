@@ -1,0 +1,101 @@
+//FJ proofs
+
+//TODO - 
+
+//invert msg should state which rule is inverted
+//lambda calculus TODOs
+//fix state
+//base case of subst lemma
+//substeq - take into account fv/equalities
+//apply indhypp - assume the premises of the lemma
+//automatically eliminate ands and intro them in apply/done/done'
+//allow assume to take arguments, which it should ignore
+//allow * args
+//allow embedded seqs (-forall)
+//auto sind
+//auto lemma weak/invert
+//substin, substout (or something)
+//track assumptions properly
+//add emptyset to the start or end of a list
+//interactive proof mode
+//errors should not stop proof printing + silence errors caused by errors
+//proof commands as plugins
+//clear x - check that x is not used anywhere
+//hide [x] - remove from state, but still exists
+
+//meta-commands
+//clear label*  clear an entry from the current state
+//state [path]
+//  path ::= id | pb '.' id
+//  pb ::= '.' | 'up' '.up'*
+
+
+proof
+  prog. assume {pcheck |- P}
+  progP. invert prog
+  
+  lemma substtc "substitution lemma (type checking)"
+    {tcheck (G,G') |- {e'/x}e; T}
+    where
+      p1. {tcheck (G,x:U,G') |- e; T}
+      p2. {tcheck G |- e'; U}
+    proof
+      1. sind p1
+        case T-New
+          1. apply indhyp; case.3; up.p2
+          2. apply T-New; case.2; 1
+          3. substeq {new T <{e'/x}[e]> = {e'/x}(new T <[e]>)}
+          4. replace 2; 3
+          5. replace' 4; case.1
+          done 5
+        case T-Subs
+          1. apply indhyp; case.1; up.p2
+          2. apply T-Subs; 1; case.2
+          done 2
+        case T-Var
+          //state
+          0. sym case.2
+          1. -fun 0
+          2. -inconcat 1.1
+          3. -or 2
+            case 1
+              state //x1:T in G
+              //TODO
+              //00. dom case //x1 in dom((G))
+              //TODO
+              //0. -funconcat up.1.2; 00 //not x1 in dom((x:U,G'))
+              //TODO
+              //04. evaleq {dom((x:U,G')) = x,dom((G'))}
+              //05. replace 0; 04 //not x1 in x,dom((G'))
+              //06. -inconcat 05 //not x1 in x and not x1 in dom((G'))
+              //07. -and 06
+              //1. -ineq 07.1 //not x = x1
+              //2. substeq {{e/x}x1 = x1}; 1
+              //TODO
+              //3. weakin case //x1:T in G,G'
+              //4. weakf //fun((G,G'))
+              //5. fun 3; 4 // G,G'((x1)) = T
+              //6. apply T-Var; 5 //tcheck G,G |- x1 : T
+              //7. replace' 6; 2 //tcheck G,G |- {e'/x}x1 : T
+              //8. replace up.case.1
+              //done 8
+          //TODO 2 cases
+        case T-Field
+          1. apply indhyp; case.2; up.p2
+          2. apply T-Field; case.3; 1
+          3. substeq {{e'/x}e2.f = {e'/x}(e2.f)}
+          4. replace 2; 3
+          5. replace' 4; case.1
+          done 5
+        case T-Invk
+          1. apply indhyp; case.2; up.p2
+          2. apply indhyp; case.4; up.p2
+          3. apply T-Invk; 1; case.3; 2
+          4. substeq {{e'/x}e3.m<{e'/x}[e1]> = {e'/x}(e3.m<[e1]>)}
+          5. replace 3; 4
+          6. replace' 5; case.1
+          //TODO not using the equalities in 5,6
+          done 6
+          
+        
+        

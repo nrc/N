@@ -1,0 +1,115 @@
+\newcommand{\nnnlam}{\lambda}
+\newcommand{\nnne}{e}
+\newcommand{\nnnG}{\Gamma}
+\newcommand{\nnnn}{n}
+\newcommand{\nnnto}{\rightarrow}
+\newcommand{\nnnU}{U}
+\newcommand{\nnnT}{T}
+\newcommand{\nnnv}{v}
+\newcommand{\nnny}{\code{y}}
+\newcommand{\nnnx}{\code{x}}
+\newcommand{\nnnz}{\code{z}}
+
+\newcommand{\nnjwf}[1]{\vdash {#1} \ok}
+\newcommand{\nnjtCheck}[3]{{#1} \vdash {#2} : {#3}}
+\newcommand{\nnjop}[2]{{#1} \redArrow {#2}}
+
+
+\input{nobmacros.tex}
+\input{nobpreboiler.tex}
+
+%\input{macros.tex}
+
+\newcommand{\redArrow}{\leadsto}
+
+\newcommand{\ok}{\mbox{ \sc ok}}
+
+\startSyntaxFig
+
+$\nnnT, \nnnU $\>\bbc\> $\code{int} \OR \nnnT \nnnto \nnnT $\>\annot{types}\\
+$\nnne $\>\bbc\> $\nnnn \OR \nnnx \OR \nnne \ \nnne \OR \nnnlam \nnnx \code{:} \nnnT \code{.} \nnne $\>\annot{expressions}\\
+\\
+
+$\nnnv $\>\bbc\> $\nnnn \OR \nnnlam \nnnx \code{:} \nnnT \code{.} \nnne $\>\annot{values}\\
+\\
+
+$\nnnG $\>\bbc\> $\overline{\nnnx \code{:} \nnnT} $\>\annot{environments}\\
+\\
+
+$\nnnn $\>\> \>\annot{integers}\\
+$\nnnx, \nnny, \nnnz $\>\> \>\annot{variables}\\
+%$\nnnlam $\>\> \\
+%$\nnnto $\>\> \\
+
+\finSyntaxFig
+
+
+
+
+%semantics:
+
+\startJudgeFig{Type checking}{\nnjtCheck{\nnnG}{\nnne}{\nnnT}}
+
+\redRule{
+\nnjtCheck{\nnnG,\nnnx \code{:} \nnnT}{\nnne}{\nnnU}
+}{
+\nnjtCheck{\nnnG}{\nnnlam \nnnx \code{:} \nnnT \code{.} \nnne}{\nnnT \nnnto \nnnU}
+}{T-Abs}
+\redRule{
+\nnnG(\nnnx) = \nnnT
+}{
+\nnjtCheck{\nnnG}{\nnnx}{\nnnT}
+}{T-Var}
+\redRule{
+\nnjtCheck{\nnnG}{\nnne}{\nnnU \nnnto \nnnT}\qquad
+\nnjtCheck{\nnnG}{\nnne'}{\nnnU}
+}{
+\nnjtCheck{\nnnG}{\nnne \ \nnne'}{\nnnT}
+}{T-App}
+\redRule{
+}{
+\nnjtCheck{\nnnG}{\nnnn}{\code{int}}
+}{T-Int}
+\finJudgeFig{\lang type checking.}{tCheck}
+
+
+\startJudgeFig{Well-formedness}{\nnjwf{\nnnT}}
+
+\redRule{
+}{
+\nnjwf{\code{int}}
+}{F-Int}
+\redRule{
+\nnjwf{\nnnT}\qquad
+\nnjwf{\nnnT'}
+}{
+\nnjwf{\nnnT \nnnto \nnnT'}
+}{F-Fun}
+\finJudgeFig{\lang well-formedness.}{wf}
+
+
+\startJudgeFig{Reduction}{\nnjop{\nnne}{\nnne}}
+
+\redRule{
+\nnjop{\nnne_{1}}{\nnne'_{1}}
+}{
+\nnjop{\nnne_{1} \ \nnne_{2}}{\nnne'_{1} \ \nnne_{2}}
+}{RC-App1}
+\redRule{
+\nnjop{\nnne}{\nnne'}
+}{
+\nnjop{\nnnv \ \nnne'}{\nnnv \ \nnne'}
+}{RC-App2}
+\redRule{
+}{
+\nnjop{(\nnnlam \nnnx \code{:} \nnnT \code{.} \nnne) \ \nnnv}{\code{[$\nnnv$/$x$]}\nnne}
+}{R-App}
+\redRule{
+}{
+\nnjop{\nnnlam \nnnx \code{:} \nnnT \code{.} \nnne \ \nnnv}{\code{[$\nnnv$/$x$]}\nnne}
+}{R-App-Alt}
+\finJudgeFig{\lang reduction.}{op}
+
+
+\input{nobpostboiler.tex}
+

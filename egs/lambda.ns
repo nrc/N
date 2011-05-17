@@ -1,0 +1,8 @@
+load lambda
+load lproof
+//animate
+//subtype [x:T]; G
+//type G,G'
+//type G,x:T
+//exit
+exit

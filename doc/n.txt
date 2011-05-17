@@ -1,0 +1,94 @@
+N v0.09
+
+status: almost finished the first prototype version and buggy as hell
+
+N is a tool for working with the semantics of programming languages. The primary input is a formal description of a PL. N type checks this formalisation, checking for the kind of errors a compiler would find with source code. N can output fairly good LaTeX, lets you experiment with expressions and judgements in your langauge, and assists with and checks proofs (note it is not a formal proof checker --- it does not guarantee that any proof is correct).
+
+Contents
+--------
+
+ - Introduction
+ - Top mode commands
+ - Animation mode commands
+ - Source language
+ - Proof langauge
+ - Examples
+
+Introduction
+------------
+
+N is written in Python and requires a Python installation to run. Assuming the python runtime is on the search path, you run it with "n.py" at the command prompt or console. This launches N in interactive mode. You can pass an N script file as a parameter, e.g., "n.py fj.ns", to run the script. Script files use the same commands as N in interactive mode. To see what you can do, use the "help" command.
+
+N has four modes and four different languages. The top mode is used to load and check formalisations, output LaTeX, etc., it is the default mode when you run N. The same commands used in the top mode can be used in script files (which usually have the extension "ns"). From the top mode you can launch the animation mode to experiment with lanaguge expressions and judgements, this is done using the "animate" command. "help" will give you help on commands, this works in either the top or animation modes. "exit" will take you from animation to top mode, or quit N, if you are already in the top mode.
+
+Source mode is used to read and check PL specifications. Source mode is not interactive. Use the "load" command in top mode to load and check a source file (which will usually have an "n" extension). Source files can include proofs which would also be non-interative. Proofs can also be done interactively (in proof mode) by using the "proof" command from top mode [note: interactive proof mode is not yet implemented].
+
+
+Top mode commands
+-----------------
+
+help                  print a help message
+exit                  exit nob
+load filenames        load the specified files
+latex [filename]      output the current formal system as latex
+print [filename]      output the current formal system in the source format
+proof                 switch to proof mode
+animate               switch to animation mode
+
+* cmd                 execute cmd if an error has occured
+**                    reset the error flag
+
+The latter two are most useful in script files, e.g.:
+
+load eg.n
+*exit
+print eg.out
+
+This script will only output if there were no errors checking eg.n.
+
+load assumes the extension ".n" if no extension is given. latex and print default to ".tex" and ".n.out" if an extension is missing.
+
+
+Animation mode commands
+-----------------------
+
+  help               print a help message
+  exit               leave animation mode
+
+  eval p [with cs]   evaluate the meta-expression p
+                       using the given free variable bindings
+                       c ::= x '=' e
+                       cs ::= cs ';' c | []
+  assume p           add p to the environment if not p cannot be proved
+  env [clear]        display the current environment 
+                       clear = clear environment
+  type e             the type of e
+  ids e              the ids in e
+  names e            the names in e
+  match sym; s       try to match the expression s to the symbol sym
+  subtype t1; t2     tries t1 <: t2
+  sup sym            prints all super-symbols of sym
+  symbols            prints the symbol table
+  judges             prints the table of judgements
+  subst [s]          print the definition information for the variable s (no s = all variables)
+
+  assert r; m        assert that m evaluates to the given result
+
+See fj.ns for some examples of using these commands
+
+
+Source language
+---------------
+
+TODO, see the examples for now
+
+
+Proof language
+--------------
+
+also TODO, see the examples for now
+
+Examples
+--------
+
+Several examples are included in the egs directory. The current examples are lambda calculus with soundness proofs, Featherweight Java with some bits of proof and some animation examples, and Featherweight Generic Java. Most examples have several N source files and a script file.

@@ -1,0 +1,158 @@
+//lambda calculus proofs
+
+proof
+
+  //weakening
+  lemma weaktc "weakening (type checking)"
+    {tcheck (G,x:U,G') |- e; T}
+    where
+      p1. {tcheck (G,G') |- e; T}
+      p2. {not x in dom((G,G'))}
+    proof
+      1. sind p1
+        case T-Var
+          1. -fun case.2 //x1:T in G,G'; fun((G,G'))
+          2. weakf 1.2; up.p2
+          22. -forall 2; U //fun((G,x:U,G'))
+          3. weakin 1.1 //forall G1. x1:T in G,G1,G'
+          31. let {G'' = x:U}
+          32. -forall 3; G'' //x1:T in G,G'',G'
+          33. replace 32; 31 //x1:T in G,x:U,G'
+          4. fun 33;22 //G,x:U,G'((x1)) = U1
+          5. apply T-Var; 4
+          6. replace' 5; case.1
+          done 6
+        case T-Int
+          1. apply T-Int; case.1; case.2
+          2. let {G'' = (G,x:U,G')}
+          3. -forall 1; G''; n
+          4. done= 3
+        case T-Abs
+          2. let {G'' = G',x1:T1}
+          1. assume {not x in dom((G,G''))}
+          //TODO replace not working in concat
+          //3. replace' case.3; 2
+          3. assume {tcheck (G,G'') |- e1; U}
+          4. apply indhyp; 3; 1
+          5. replace 4; 2
+          //TODO pattern matching getting stuck in the concat
+          //6. apply T-Abs; 5
+          6. assume {tcheck (G,x:U,G') |- lam x1:T1.e1; T1 to U}
+          7. done= 6
+        case T-App
+          state
+          1. apply indhyp; case.2; up.p2
+          2. apply indhyp; case.3; up.p2
+          3. apply T-App; 1; 2
+          done= 3
+      done 1
+          
+
+  //substitution
+  lemma substtc "substitution lemma (type checking)"
+    {tcheck (G,G') |- {e'/x}e; T}
+    where
+      p1. {tcheck (G,x:U,G') |- e; T}
+      p2. {tcheck G |- e'; U}
+    proof
+      1. sind p1
+        case T-Var
+          //mostly TODO
+          1. -fun case.2
+          2. -inconcat 1.1
+          3. -or 2
+            case 1
+              1. assume {tcheck (G,G') |- {e'/x}x2; T}
+              //TODO reference up.case.1 not working, nor is done=
+              //2. replace' 1; up.case.1
+              2. assume {tcheck (G,G') |- {e'/x}e; T}
+              done 2
+            case 2
+              1. assume {tcheck (G,G') |- {e'/x}e; T}
+              done 1
+            case 3
+              1. assume {tcheck (G,G') |- {e'/x}e; T}
+              done 1
+          done 3
+        case T-Int
+          state
+          1. substeq {{e'/x}n = n}
+          2. apply T-Int
+          3. let {G'' = G,G'}
+          4. -forall 2; G''; n
+          5. replace 4; 3
+          6. replace' 5; 1
+          7. replace' 6; case.1
+          8. replace' 7; case.2
+          //TODO done= doesn't work
+          done 8
+        case T-Abs
+          //TODO going to have the same problems as in weakening
+          1. assume {tcheck (G,G') |- {e'/x}e; T}
+          done 1
+        case T-App
+          1. apply indhyp; case.2; up.p2
+          2. apply indhyp; case.3; up.p2
+          3. apply T-App; 1; 2
+          4. substeq {({e'/x}e3) ({e'/x}e2) = {e'/x}(e3 e2)}
+          5. replace 3; 4
+          6. replace' 5; case.1
+          //TODO done= not working
+          done 6
+      done 1
+        
+
+  //subject reduction
+  lemma subred "subject reduction"
+    {tcheck [] |- e'; T}
+    where
+      p1. {tcheck [] |- e; T}
+      p2. {op |- e; e'}
+    proof
+      1. sind p2
+        case R-App
+          1. replace up.p1; case.1
+          2. invert 1
+          //TODO BUG - this should be a premise of 2
+          21. assume {U1 = T1}
+          //TODO why is there an emptyset in the concatenation
+          3. invert 2.1
+          4. replace 2.2; 21
+          //TODO should be do-able using let and properties of concat,[]
+          5. assume {tcheck ([],x:T,[]) |- e6; T}
+          6. assume {tcheck ([],[]) |- v2; T1}
+          //TODO not getting the right conclusion
+          //7. apply substtc; 5; 6
+          7. assume {tcheck [],[] |- {v2/x}e6; T}
+          //TODO identitiy of concat,[]
+          8. assume {tcheck [] |- {v2/x}e6; T}
+          //TODO not working
+          //9. replace' 8; case.2
+          9. assume {tcheck [] |- e'; T}
+          done 9
+        case RC-App-1
+          //TODO BUG this is wrong
+          case.2
+          //this is what it should be
+          c2. assume {e' = e2 e3}
+          1. replace up.p1; case.1
+          2. invert 1
+          3. apply indhyp; 2.1; case.3
+          4. apply T-App; 3; 2.2
+          done= 4
+        case RC-App-2
+          state
+          1. replace up.p1; case.2
+          2. invert 1
+          3. apply indhyp; 2.2; case.3
+          4. apply T-App; 3; 2.1
+          done= 4
+      done 1
+
+  //progress
+  //lemma progress "progress"
+  //  TODO requires 'or' and 'exists' in surface syntax
+  //  {op |- e; e' \/ exists v. e = v}
+  //  where
+  //    p1. {tcheck [] |- e; T}
+  //  proof

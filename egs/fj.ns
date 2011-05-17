@@ -1,0 +1,296 @@
+load fj.nob
+load "fj proof.nob"
+exit
+
+animate
+
+
+//eval {e/x}(new {e/x}T <[]>)
+//eval new {e/x}T <[]>
+
+//eval dom((x:U))
+//eval dom((G'))
+//TODO
+//subtype G; [x:T]
+//subtype (x:U,G'); [x:T]
+//eval dom((x:U,G'))
+exit
+exit
+
+assume PP = C1:Q1,C2:Q2
+assume Q2 = class C2 ext C1 \{[] []\}
+eval subtype |- C3; C1
+
+//assume subtype |- C1; C2
+//assume subtype |- C2; C3
+//assume subtype |- C3; C4
+//eval subtype |- C1; C4 with T2 = C2; T2 = C3
+
+//eval x = y
+//eval not x = y
+//assume x = y
+//assume not x = y
+//eval x = y
+//eval not x = y
+
+//eval subtype |- C; C
+//assume C = C'
+//eval subtype |- C; C'
+//env clear
+//eval subtype |- C; C'
+//assume not C = C'
+//eval subtype |- C; C'
+//eval tcheck (x:T) |- x; T
+//eval tcheck (x:T) |- x; T'
+
+//eval subtype |- C; C'
+//assume subtype |- C; C''
+//assume C' = C''
+//eval subtype |- C; C''
+
+//type dom(([x:T]))
+//type dom((x:T))
+//type dom((x:T,x':T'))
+//type dom(([C':Q]))
+//type dom((PP))
+//eval dom(([x:T]))
+//eval dom((x:T))
+//eval dom((x:T,x':T'))
+//eval dom(([C':Q]))
+//eval dom((PP))
+
+//eval (x,x') = (y,y')
+//env
+//eval not (x,x') = (y,y')
+//eval not (x,x') = (y,y')
+//eval (x,x') = (y,y')
+
+//eval x = y
+//eval (x,x') = (y,y')
+//eval not (x,x') = (y,y')
+//env clear
+//eval x = y
+//eval (x,x') = (y,y')
+//eval not (x,y') = (y,y')
+//eval not x:T = y:T
+
+//eval dom((G))
+//eval G = x:T,x':T'
+//eval G' = y:T,y':T'
+//eval dom((G'))
+//eval dom((G')) = (x,x')
+
+
+//type fv((x; (new C<(x,y,z)>).m<this>))
+//type fv((x; e))
+//type fv((x; new C<(x,y)>))
+//eval fv((x; (new C<(x,y,z)>).m<this>))
+//eval fv((x; e))
+//eval fv((x; new C<(x,y)>))
+exit
+exit
+
+//not x in e
+
+
+//subst x
+//fv x
+
+
+//  L ::= test [x y] ext [e e'] {binds [x] in [e]}
+//eval {z'/z}(test (x x',y y') ext (e1 e1', e2 e2'))    //syn sub
+//eval not z = x
+//eval not z = y
+//eval {z'/z}(test (x x',y y') ext (e1 e1', e2 e2'))    //test (x {z'/z}x',y {z'/z}y') ext ({z'/z}e1 {z'/z}e1', {z'/z}e2 {z'/z}e2')
+//env clear
+//eval not z in x,y
+//eval {z'/z}(test (x x',y y') ext (e1 e1', e2 e2'))    //test (x {z'/z}x',y {z'/z}y') ext ({z'/z}e1 {z'/z}e1', {z'/z}e2 {z'/z}e2')
+//env clear
+//eval z = x
+//eval not z = y
+//eval {z'/z}(test (x x',y y') ext (e1 e1', e2 e2'))    //test (x {z'/z}x',y {z'/z}y') ext (e1 {z'/z}e1', e2 {z'/z}e2')
+
+exit
+exit
+
+//eval {e''/x}(T m<(U x)> \{ return (new C<(x,y)>)\; \})    //no subst
+//eval {e''/x}(T m<(U x)> \{ return e\; \})                 //no subst
+//eval {e''/x}(T m<(U y)> \{ return (new C<(x,y)>)\; \})    //syn subst
+//eval not x = y
+//eval {e''/x}(T m<(U y)> \{ return (new C<(x,y)>)\; \})    //T m<(U y)> \{ return (new C<(e'',y)>)\; \}
+
+//  J ::= test x ext e and y ext e' {binds x in e} {binds y in e'}
+//eval {e'/x}(test x ext e and x ext e')    //no subst
+//eval {e'/x}(test x ext e and y ext e')    //syn subst
+//eval {e'/x}(test x ext e and y ext e)     //syn subst
+//eval {e'/x}(test x ext e and y ext e')    //syn subst
+//eval {e'/x}(test x ext e and y ext y)     //syn subst
+//eval not x = y
+//eval {e'/x}(test x ext e and y ext e')    //subst each
+//eval {e'/x}(test x ext e and y ext y)     //subst each = no subst
+
+
+//eval {e'/x}(T m<(U y)> \{ return e\; \})   //unknown - syn subst
+//eval {e'/x}(T m<(U x)> \{ return e\; \})   //match - no subst
+//eval {e'/x}(T m<(U x, U' y)> \{ return e1\; \})   //match/unknown - no subst
+//eval not x = y
+//eval {e'/x}(T m<(U y)> \{ return e\; \})   //no match - subst each
+//eval {e'/x}(T m<(U x, U' y)> \{ return e\; \})   //match/no match - no subst
+
+
+
+//binding by lists
+//match M; (T m<[U x]> \{ return x\; \})
+//eval {e/x}(T m<[U x]> \{ return x\; \})   //syn subst
+//eval x in [x]
+//eval {e/x}(T m<[U x]> \{ return x\; \})   //no subst
+//env clear
+//eval not x in [x]
+//eval {e/x}(T m<[U x]> \{ return x\; \})   //subst each = T m<[U x]> \{ return e\; \}
+
+eval not x = y
+eval not y = z
+eval {e/x}z  //syn subst
+exit
+exit
+
+//env clear
+
+//eval x = y
+//eval not y = z
+//eval {e/x}z   //z
+
+
+//eval not x in [e']
+//eval [e] = [e']
+//eval {e/x}[e]   //[e]
+
+//eval x = x_i
+//eval not x in [x]
+//eval x in [x]
+
+
+//type D,X extb N
+
+//eval {e/x}(x,y)
+//eval {e/x}(x,[y])
+//eval {e/x}(G,x:T)
+//eval {U/X}(D,X extb (C<(X)>))
+//eval {U/X}(D,Y extb (C<(X)>))
+
+//type {e/x}(x,y)
+//type {e/x}(x y (x,y))
+//type {e/x}(T m<(U x)> \{ return x\; \})
+//type {e/x}x
+//type {e/x}[x]
+
+//match [x]; y
+//match [x]; [y]
+//match [x]; x,y
+//match x; y
+//match x; [y]
+//match [x]; x,y,z
+//match [T x]; T1 x1, T2 x2
+
+//match e; new C<(x,y)>
+//match [T x]; U x
+//match M; (T m<(U x)> \{ return (new C<(x,y)>)\; \})
+
+//eval {e''/x}(T m<(U x)> \{ return x\; \})                 //no subst
+//eval {e''/x}(T m<(U y)> \{ return x\; \})                 //syn subst
+//eval {e''/x}(T m<(U x)> \{ return (new C<(x,y)>)\; \})    //no subst
+//eval {e''/x}(T m<(U y)> \{ return (new C<(x,y)>)\; \})    //syn subst
+
+//assert False; eval not C'_i in [C']
+//assert True; eval not C_i in [C']
+
+//eval {e/x}[x]
+
+//assert [x]; type x,y,z
+//assert True; eval x in x,y,z
+//assert True; eval x' in x,x',x'',y
+//assert False; eval x in x',y',z'
+//assert True; eval C_i in [C]
+//assert True; eval C'_i in [C']
+//assert False; eval C_i in [C']
+//assert False; eval C'_i in [C]
+
+//eval [C] = C'',C',C''
+//assert True; eval C_0 in [C]
+//assert False; eval C_5 in [C]
+//eval C_0
+//eval C_5
+//eval C_i
+//assert T; type apply x:T,y:U; y
+//assert T; type apply [x:T];y
+//eval x:T in G
+//eval C = C
+//eval Q = class C ext Object \{[] []\}
+//eval Q = class C ext Object \{[] []\}
+//eval PP = C:Q
+//eval apply PP; C
+//eval apply x':T; x'
+//eval apply x:U'',y':U'; x
+//eval x
+//exit
+//exit
+
+assert Yes; match G; [x:T]
+assert Yes; match G; x:T
+assert Yes; match G; this:C
+assert Yes; subtype []; G
+assert Yes; subtype e:x; e:e
+assert Yes; subtype (class Object ext Object \{[] []\}); Q
+assert Yes; subtype Object:(class Object ext Object \{[] []\}); C:Q
+assert Yes; subtype Object:(class Object ext Object \{[] []\}); [C:Q]
+assert Yes; match PP; Object:(class Object ext Object \{[] []\}),[C:Q]
+//exit
+//exit
+
+assert Yes; match M; ...
+assert Yes; match M; T m ...
+assert Yes; match Q; class C ext ... \{[T f\;] [M]\}
+assert Yes; match Q; class C ext D \{[T f\;] ...\}
+assert Yes; match Q; class ... \{[T f\;] [M]\}
+assert Yes; match Q; class C ext D ...
+assert Yes; match Q; ... \{[T f\;] [M]\}
+assert Yes; match Q; ...
+assert No; match Q; class C ext D \{[T f\;] [T]\}
+assert No; match Q; class C ext D \{[T f\;] [M]\} ...
+assert No; match Q; class C ext D ... \{[T f\;] [M]\}
+assert No; match Q; class C ext D \{... [T]\}
+//exit
+//exit
+
+assert Yes; match e; e'
+assert Yes; match e; x
+assert Yes; match e; e.f
+assert Yes; match e; e.m<[e]>
+assert Yes; match e; new C<[e]>
+assert Yes; match [e]; [e]
+assert Yes; match [e]; [x]
+
+
+assert Yes; match [e]; e
+assert Yes; match e; e.m<[]>
+assert Yes; match e; e.m<e'>
+
+assert Yes; match [e]; e,e'
+assert [e]; type e,e'
+assert No; subtype x; e.m<T>
+assert No; match e; e.m<[T]>
+assert No; match e; e.m<T>
+assert No; match e.m<[e]>; e.m<T>
+assert Yes; match e; e.m<(e,e')>
+//exit
+//exit
+
+//print fj
+//latex fj
+
+//sh latex fj
+//sh dvipdfm fj
+//sh fj.pdf
+
+//then exit
+//exit

@@ -1,0 +1,141 @@
+//Featherweight Java
+
+[[\newcommand{\redArrow}{\leadsto}]]
+[[\newcommand{\ok}{\mbox{ \sc ok}}]]
+[[\newcommand{\inn}{\mbox{ \sc in}}]]
+[[\newcommand{\extends}{\lhd}]]
+
+syntax
+  P ::= [Q] e "programs"
+  Q ::= class C<[X extb N]> ext N \{[T f\;] [M]\} {binds [X] in [T];N;[N];[M]} "class definitions"
+  M ::= T<[X extb N]> m\([T x]\) \{ return e\; \} {binds [x] in e} {binds [X] in [N];T;[T]} "method definitions"
+  [[]]
+  T;U ::= N | X "types"
+  N ::= C<[T]> "class names"
+  e ::= x | new N\([e]\) | e.f | e.<[T]>m \( [e] \) "expressions"
+  v ::= new N\([v]\) "values"
+  [[]]
+  var {e} x;y;z;this "variables"
+  var {T} X;Y;Z "type variables"
+  C;Object "class names"
+  f "field names"
+  m "method names"
+  [[]]
+  env {x->T} G [[\Gamma]]_ ::= [x:T] {binds [x]} "environments"
+  env {X->N} D [[\Delta]]_ ::= [X extb N] {binds [X] in [N]} "type environments"
+  env {C->Q} {global} PP [[\mathcal{P}]] ::= [C:Q] "programs"
+  [[]]
+  extb [[\extends]]
+  ext [[\extends]]_
+  
+
+  
+
+judge fields |- N; [f]; [T] [[fields(N) = [f];[T] ]]
+  case |- Object<[]>; []; []
+  case |- C<[U]>; [f],[f'];{[U]/[X]}[T],[T']
+    apply PP; C = class C<[X...]> ext N \{[T f\;] [M]\}
+    fields |- {[U]/[X]}N; [f']; [T']    
+
+judge fType |- f; N; T [[fType(f, N) = T]]
+  case |- f_i; C<[U]>; T_i
+    PP((C)) = class C<[X...]> ext N \{[T f\;] ...\}
+  case |- f; C<[U]>; T
+    PP((C)) = class C<[X...]> ext N \{[T f\;] ...\}
+    not f in [f]
+    fType |- f; {[U]/[X]}N; T
+
+judge mType |- m; N; D; [T]; T [[mType(m, N) = D;[T];T]]
+  case |- m; C<[T']>; [Y extb {[T']/[X]}N];{[T']/[X]}[T]; {[T']/[X]}T
+    PP((C)) = class C<[X...]> ext N \{... [M]\}
+    T<[Y extb N]> m\([T x]\) ... in [M]
+  case |- m; C<[T']>; [Y extb N]; [T]; T
+    PP((C)) = class C<[X...]> ext N \{... [M]\}
+    not ... m ... in [M]
+    mType |- m; {[T']/[X]}N; [Y extb N]; [T]; T
+
+judge mBody |- m; N; [x]; e [[mBody(m, N) = [x];e]]
+  case |- m; C<[T']>; [x]; {[T']/[X]}e
+    PP((C)) = class C<[X...]> ext N \{... [M]\}
+    T<[Y extb N]> m\([T x]\) \{ return e\; \} in [M]
+  case |- m; C<[T']>; [x]; e
+    PP((C)) = class C<[X...]> ext N \{... [M]\}
+    not ... m ... in [M]
+    mBody |- m; {[T']/[X]}N; [x]; e
+    
+    
+judge override |- m; C; D; [T]; T
+  case |- m; C; D; [T]; T
+    PP((C)) = class C<...> ext N ...
+    not mType |- m; N; ...; ...; ...
+  case |- m; C; D; [T]; T
+    PP((C)) = class C<...> ext N ...
+    mType |- m; N; D; [T]; T
+
+  
+judge subtype D |- T; T [[D \vdash T <: T]] "subtyping"
+  case D |- T; T "S-Reflex"
+  case D |- T1; T2 "S-Trans"
+    subtype D |- T1; T3
+    subtype D |- T2; T3
+  case D |- C<[T]>; {[T]/[X]}N "S-Sub-Class"
+    PP((C)) = class C<[X extb N]> ext N ...
+  case D |- X; T "S-Bound"
+    D((X)) = T
+
+judge wf D |- T [[D \vdash T \ok]] "well-formed types"
+  case D |- C<[T]> "F-Class"
+    PP((C)) = class C<[X extb N]> ...
+    subtype D |- [T]; {[T]/[X]}[N]
+  case D |- X "F-Var"
+    D((X)) = ...
+    
+    
+judge wfd D |- D [[D \vdash D \ok]] "well-formed type environments"
+  case D |- [X extb N] "F-Env"
+    wf D,[X extb N] |- [N]
+    
+
+judge tcheck D;G |- e; T [[D;G \vdash e : T]] "type checking"
+  case D;G |- e; T "T-Subs"
+    tcheck D;G |- e; U
+    subtype D |- U; T
+  case D;G |- x; T "T-Var"
+    T = G((x))
+  case D;G |- new N\([e]\); N "T-New"
+    fields |- N; [f];[T]
+    tcheck D;G |- [e]; [T]
+  case D;G |- e.f; T "T-Field"
+    tcheck D;G |- e; N
+    fType |- f; N; T
+  case D;G |- e.<[T]>m\([e]\); T "T-Invk"
+    tcheck D;G |- e; N
+    mType |- m; N; [X extb N]; [U]; T
+    subtype D |- [T]; {[T]/[X]}[N]
+    wf D |- [T]
+    tcheck D;G |- [e]; {[T]/[X]}[U]
+
+judge mcheck D; G; C |- M [[D; G \vdash M \inn\ C]] "well-typed methods"
+  case D; G; C |- T <[X extb N]>m\([T x]\) \{ return e\; \} "T-Method"
+    D' = [X extb N]
+    wf D,D' |- T
+    wf D,D' |- [T]
+    wfd D |- D'
+    tcheck D; G,[x:T] |- e; T
+    override |- m; C; [X extb N]; [T]; T
+
+judge ccheck |- Q [[\vdash Q]] "well-typed classes"
+  case |- class C<[X extb N]> ext N \{[T f\;] [M]\} "T-Class"
+    D = [X extb N]
+    wfd [] |- D
+    wf D |- N
+    wf D |- [T]
+    mcheck D; this:(C<[X]>); C |- [M]
+
+judge pcheck |- P [[\vdash P]] "well-typed programs"
+  case |- [Q] e
+    ccheck |- [Q]
+    tcheck [];[] |- e; T
+    [Q] = [class C ...]
+    PP = Object:(class Object<[]> ext (Object<[]>) \{[] []\}),[C:Q]
+  

@@ -1,0 +1,141 @@
+//Featherweight Java
+
+[[\newcommand{\redArrow}{\leadsto}]]
+[[\newcommand{\ok}{\mbox{ \sc ok}}]]
+[[\newcommand{\inn}{\mbox{ \sc in}}]]
+[[\newcommand{\extends}{\lhd}]]
+
+
+syntax
+//  L ::= test [x y] ext [e e'] {binds [x] in [e]}
+//  J ::= test x ext e and y ext e' {binds x in e} {binds y in e'}
+  P ::= [Q] e "programs"
+  Q ::= class C ext D \{[T f\;] [M]\} "class definitions"
+  M ::= T m<[T x]> \{ return e\; \} {binds [x] in e} "method definitions"
+  [[]]
+  T;U ::= C "types"
+  e ::= x | new C<[e]> | e.f | e.m<[e]> "expressions"
+  v ::= new C<[v]> "values"
+  [[]]
+  var {e} x;y;z;this "variables"
+  C;D;Object "class names"
+  f "field names"
+  m "method names"
+  [[]]
+  env {x->T} G [[\Gamma]]_ ::= [x:T] {binds [x]} "environments"
+  env {C->Q} {global} PP [[\mathcal{P}]] ::= [C:Q] "programs"
+  [[]]
+  ext [[\extends]]_
+  < [[\code{(}]]
+  > [[\code{)}]]
+  
+
+
+judge fields |- C; [f]; [T] [[fields(C) = [f];[T] ]]
+  case |- Object; []; []
+  case |- C; [f],[f'];[T],[T']
+    apply PP; C = class C ext D \{[T f\;] [M]\}
+    fields |- D; [f']; [T']    
+
+judge fType |- f; C; T [[fType(f, C) = T]]
+  case |- f_i; C; T_i
+    PP((C)) = class C ext D \{[T f\;] ...\}
+  case |- f; C; T
+    apply PP; C = class C ext D \{[T f\;] ...\}
+    not f in [f]
+    fType |- f; D; T
+
+judge mType |- m; C; [T]; T [[mType(m, C) = [T];T]]
+  case |- m; C; [T]; T
+    PP((C)) = class C ext D \{... [M]\}
+    T m<[T x]> ... in [M]
+  case |- m; C; [T]; T
+    PP((C)) = class C ext D \{... [M]\}
+    not U m ... in [M]
+    mType |- m; D; [T]; T
+
+judge mBody |- m; C; [x]; e [[mBody(m, C) = [x];e]]
+  case |- m; C; [x]; e
+    PP((C)) = class C ext D \{... [M]\}
+    T m<[T x]> \{ return e\; \} in [M]
+  case |- m; C; [x]; e
+    PP((C)) = class C ext D \{... [M]\}
+    not T m ... in [M]
+    mBody |- m; D; [x]; e
+    
+    
+judge override |- m; C; [T]; T
+  case |- m; C; [T]; T
+    PP((C)) = class C ext D ...
+    not mType |- m; D; [U]; U
+  case |- m; C; [T]; T
+    PP((C)) = class C ext D ...
+    mType |- m; D; [T]; T
+
+  
+judge subtype |- T; T [[\vdash T <: T]] "subtyping"
+  case |- T; T "S-Reflex"
+  case |- T1; T3 "S-Trans"
+    subtype |- T1; T2
+    subtype |- T2; T3
+  case |- C; D "S-Sub-Class"
+    PP((C)) = class C ext D ...
+
+judge wf |- T [[\vdash T \ok]] "well-formedness"
+  case |- C "F-Class"
+    PP((C)) = ...
+
+judge tcheck G |- e; T [[G \vdash e : T]] "type checking"
+  case G |- e; T "T-Subs"
+    tcheck G |- e; U
+    subtype |- U; T
+  case G |- x; T "T-Var"
+    T = G((x))
+  case G |- new C<[e]>; C "T-New"
+    fields |- C; [f];[T]
+    tcheck G |- [e]; [T]
+  case G |- e.f; T "T-Field"
+    tcheck G |- e; C
+    fType |- f; C; T
+  case G |- e.m<[e]>; T "T-Invk"
+    tcheck G |- e; C
+    mType |- m; C; [T]; T
+    tcheck G |- [e]; [T]
+
+judge mcheck G; C |- M [[G \vdash M \inn C]] "well-typed methods"
+  case G; C |- T m<[T x]> \{ return e\; \} "T-Method"
+    wf |- T
+    wf |- [T]
+    tcheck G,[x:T] |- e; T
+    override |- m; C; [T]; T
+
+judge ccheck |- Q [[\vdash Q]] "well-typed classes"
+  case |- class C ext D \{[T f\;] [M]\} "T-Class"
+    wf |- D
+    wf |- [T]
+    mcheck this:C; C |- [M]
+
+judge pcheck |- P [[\vdash P]] "well-typed programs"
+  case |- [Q] e
+    ccheck |- [Q]
+    tcheck [] |- e; T
+    [Q] = [class C ...]
+    PP = Object:(class Object ext Object \{[] []\}),[C:Q]
+    
+judge semantics |- e; e [[e \redArrow e]] "operational semantics"
+  case |- (new C<[v]>).(f_i); v_i "R-Field"
+    fields |- C; [f]; [T]
+  case |- v.m<[v]>; e0 "R-Invk"
+    v = (new C<[v']>)
+    mType |- m; C; [x]; e
+    e0 = {[v]/[x]}{v/this}e
+  case |- new C<([v],e,[e])>; new C<([v],e',[e])> "RC-New"
+    semantics |- e; e'
+  case |- v.m<([v],e,[e])>; v.m<([v],e',[e])> "RC-Invk-Arg"
+    semantics |- e; e'
+  case |- e.m<[e]>; e'.m<[e]> "RC-Invk-Recv"
+    semantics |- e; e'
+  case |- e.f; e'.f "RC-Field"
+    semantics |- e; e'
+    
+  
